@@ -1,0 +1,101 @@
+:root {
+  --card: #ffffff;
+  --gilding-1: #8a98b1;
+  --gilding-2: #bbcadc;
+}
+
+html {
+  background-color: #373e46;
+  height: 100%;
+}
+
+.app {
+  align-items: center;
+  background-color: #373e46;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.card {
+  background-color: var(--card);
+  border-radius: 1rem;
+  height: 24.75rem;
+  width: 17.5rem;
+
+  svg {
+    position: relative;
+    left: -0.7rem;
+    top: -0.5rem;
+  }
+
+  .face {
+    font-family: 'Gill Sans', 'Gill Sans MT', 'Calibri', 'Trebuchet MS', sans-serif;
+    padding: 0 2.5rem;
+    margin-top: -12rem;
+    width: 12.5rem;
+
+    h1 {
+      font-size: 0.9rem;
+      user-select: none;
+    }
+
+    p {
+      font-size: 0.9rem;
+      user-select: none;
+    }
+  }
+}
+
+.deck-depth-0 { box-shadow: none; }
+.deck-depth-1 { box-shadow: 1px 1px var(--gilding-1); }
+.deck-depth-2 { box-shadow: 1px 1px var(--gilding-1), 2px 2px var(--gilding-2); }
+.deck-depth-3 { box-shadow: 1px 1px var(--gilding-1), 2px 2px var(--gilding-2), 3px 3px var(--gilding-1); }
+.deck-depth-4 { box-shadow: 1px 1px var(--gilding-1), 2px 2px var(--gilding-2), 3px 3px var(--gilding-1), 4px 4px var(--gilding-2); }
+.deck-depth-5 { box-shadow: 1px 1px var(--gilding-1), 2px 2px var(--gilding-2), 3px 3px var(--gilding-1), 4px 4px var(--gilding-2), 5px 5px var(--gilding-1); }
+.deck-depth-6 { box-shadow: 1px 1px var(--gilding-1), 2px 2px var(--gilding-2), 3px 3px var(--gilding-1), 4px 4px var(--gilding-2), 5px 5px var(--gilding-1), 6px 6px var(--gilding-2); }
+.deck-depth-7 { box-shadow: 1px 1px var(--gilding-1), 2px 2px var(--gilding-2), 3px 3px var(--gilding-1), 4px 4px var(--gilding-2), 5px 5px var(--gilding-1), 6px 6px var(--gilding-2), 7px 7px var(--gilding-1); }
+.deck-depth-8 { box-shadow: 1px 1px var(--gilding-1), 2px 2px var(--gilding-2), 3px 3px var(--gilding-1), 4px 4px var(--gilding-2), 5px 5px var(--gilding-1), 6px 6px var(--gilding-2), 7px 7px var(--gilding-1), 8px 8px var(--gilding-2); }
+.deck-depth-9 { box-shadow: 1px 1px var(--gilding-1), 2px 2px var(--gilding-2), 3px 3px var(--gilding-1), 4px 4px var(--gilding-2), 5px 5px var(--gilding-1), 6px 6px var(--gilding-2), 7px 7px var(--gilding-1), 8px 8px var(--gilding-2), 9px 9px var(--gilding-1); }
+.deck-depth-10 { box-shadow: 1px 1px var(--gilding-1), 2px 2px var(--gilding-2), 3px 3px var(--gilding-1), 4px 4px var(--gilding-2), 5px 5px var(--gilding-1), 6px 6px var(--gilding-2), 7px 7px var(--gilding-1), 8px 8px var(--gilding-2), 9px 9px var(--gilding-1), 10px 10px var(--gilding-2); }
+.deck-depth-11 { box-shadow: 1px 1px var(--gilding-1), 2px 2px var(--gilding-2), 3px 3px var(--gilding-1), 4px 4px var(--gilding-2), 5px 5px var(--gilding-1), 6px 6px var(--gilding-2), 7px 7px var(--gilding-1), 8px 8px var(--gilding-2), 9px 9px var(--gilding-1), 10px 10px var(--gilding-2), 11px 11px var(--gilding-1); }
+.deck-depth-12 { box-shadow: 1px 1px var(--gilding-1), 2px 2px var(--gilding-2), 3px 3px var(--gilding-1), 4px 4px var(--gilding-2), 5px 5px var(--gilding-1), 6px 6px var(--gilding-2), 7px 7px var(--gilding-1), 8px 8px var(--gilding-2), 9px 9px var(--gilding-1), 10px 10px var(--gilding-2), 11px 11px var(--gilding-1), 12px 12px var(--gilding-2); }
+.deck-depth-13 { box-shadow: 1px 1px var(--gilding-1), 2px 2px var(--gilding-2), 3px 3px var(--gilding-1), 4px 4px var(--gilding-2), 5px 5px var(--gilding-1), 6px 6px var(--gilding-2), 7px 7px var(--gilding-1), 8px 8px var(--gilding-2), 9px 9px var(--gilding-1), 10px 10px var(--gilding-2), 11px 11px var(--gilding-1), 12px 12px var(--gilding-2), 13px 13px var(--gilding-1); }
+.deck-depth-14 { box-shadow: 1px 1px var(--gilding-1), 2px 2px var(--gilding-2), 3px 3px var(--gilding-1), 4px 4px var(--gilding-2), 5px 5px var(--gilding-1), 6px 6px var(--gilding-2), 7px 7px var(--gilding-1), 8px 8px var(--gilding-2), 9px 9px var(--gilding-1), 10px 10px var(--gilding-2), 11px 11px var(--gilding-1), 12px 12px var(--gilding-2), 13px 13px var(--gilding-1), 14px 14px var(--gilding-2); }
+.deck-depth-15 { box-shadow: 1px 1px var(--gilding-1), 2px 2px var(--gilding-2), 3px 3px var(--gilding-1), 4px 4px var(--gilding-2), 5px 5px var(--gilding-1), 6px 6px var(--gilding-2), 7px 7px var(--gilding-1), 8px 8px var(--gilding-2), 9px 9px var(--gilding-1), 10px 10px var(--gilding-2), 11px 11px var(--gilding-1), 12px 12px var(--gilding-2), 13px 13px var(--gilding-1), 14px 14px var(--gilding-2), 15px 15px var(--gilding-1); }
+
+.btn {
+  align-items: center;
+  background: linear-gradient(to bottom, #5296e9, #2569bc);
+  border: 1px solid #396aa6;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  font-size: 1.5rem;
+  font-weight: normal;
+  height: 3rem;
+  justify-content: center;
+  margin-top: 3rem;
+  padding: 0;
+  user-select: none;
+  width: 7.5rem;
+
+  &:active, &:focus {
+    background: linear-gradient(to top, #4589db, #1a57a1);
+    cursor: pointer;
+    padding-top: 1px;
+
+    .icon {
+      fill: #eeeeee;
+    }
+  }
+
+  .icon {
+    fill: white;
+    height: 90%;
+    width: auto;
+  }
+}

@@ -1,0 +1,40 @@
+{
+    "routes": [
+        {
+            "route": "/.auth/login/twitter",
+            "statusCode": 404
+        },
+        {
+            "route": "/.auth/login/github",
+            "statusCode": 404
+        }
+    ],
+    "responseOverrides": {
+        "401": {
+            "redirect": "/signin",
+            "statusCode": 302
+        }
+    },
+    "globalHeaders": {
+        "Content-Security-Policy": "default-src 'none'; connect-src 'self'; img-src 'self'; manifest-src 'self'; script-src 'self'; style-src 'self'",
+        "Permissions-Policy": "autoplay=(), microphone=(), geolocation=(), gyroscope=(), magnetometer=()",
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "X-XSS-Protection": "1; mode=block"
+    },
+    "mimeTypes": {
+        ".json": "application/json",
+        ".webmanifest": "application/manifest+json"
+    },
+    "navigationFallback": {
+        "rewrite": "/index.html",
+        "exclude": [
+            "*.{js,json,jpg,gif,png,css,svg,webmanifest}",
+            ".auth/*",
+            "api/*"
+        ]
+    },
+    "platform": {
+        "apiRuntime": "dotnet:6.0"
+    }
+}

@@ -1,0 +1,40 @@
+{
+    "id": "202302.1-auth-api", 
+    "version": "202302.1", 
+    "product":
+    {
+        "id": "auth-api",
+        "family": "API",
+        "name": "Auth API"
+    },
+    "date": "2023-02-11T00:00:00.000Z",
+    "notes": [
+        {
+            "id": "32980",
+            "title": "Update the bug so it doesn't happen",
+            "message": "When the bug happened it was bad, so now we've made it so that it doesn't happen",
+            "detail": "Longer HTML item",
+            "highlight": false,
+            "type": "Bug"
+        }
+    ],
+    "releases": {
+        "insiders": {
+            "id": "202302.1-202301011045",
+            "deployed": true,
+            "private": true,
+            "environment": {
+                "region": "UK",
+                "name": "Insiders",
+                "link": "https://uat.on-saturn.com/api/auth"
+            },
+            "date": "2023-02-11T00:00:00.000Z",
+            "approval": {
+                "auto": true,
+                "note": "Some text explaining who approved"
+            }
+        },
+        "production": {
+        }
+    }
+}
