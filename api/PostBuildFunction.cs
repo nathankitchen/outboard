@@ -1,16 +1,21 @@
 namespace Outboard.Api
 {
     using System;
+    using System.IO;
     using System.Net;
     using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
+    using Azure.Core;
+    using Azure.Identity;
+    using Azure.Storage.Blobs;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Http;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
+    using Outboard.Api.Resources;
 
     /// <summary>
     /// HTTP-based trigger used as an API for Outboard releases.
@@ -24,7 +29,7 @@ namespace Outboard.Api
         /// <param name="product">The ID of the product to which this build relates.</param>
         /// <param name="log">An object for recording logs.</param>
         /// <returns>204 if successfully created.</returns>
-        [FunctionName("note")]
+        [FunctionName("create-build")]
         public static async Task<HttpResponseMessage> Run(
             [HttpTrigger(AuthorizationLevel.Admin, "post", Route = "build/{product:alpha}")] HttpRequest request, string product, ILogger log)
         {
@@ -32,7 +37,27 @@ namespace Outboard.Api
             ArgumentNullException.ThrowIfNull(product);
             ArgumentNullException.ThrowIfNull(log);
 
-            await Task.CompletedTask.ConfigureAwait(true);
+            using var stream = new StreamReader(request.Body);
+            string payload = await stream.ReadToEndAsync().ConfigureAwait(false);
+
+            var build = JsonConvert.DeserializeObject<BuildResource>(payload);
+
+            var buildData = JsonConvert.SerializeObject(build);
+            using var buildStream = new MemoryStream(Encoding.Unicode.GetBytes(buildData));
+
+            TokenCredential credential = new DefaultAzureCredential();
+
+            string accountName = "account";
+            string blobUri = "https://" + accountName + ".blob.core.windows.net";
+
+            var blobServiceClient = new BlobServiceClient(new Uri(blobUri), credential);
+
+            var containerClient = blobServiceClient.GetBlobContainerClient("blobs");
+
+            var productSlug = product.ToSlug();
+            var buildSlug = build.Id.ToSlug();
+            var productPath = $"/{productSlug}/{buildSlug}.json";
+            await containerClient.UploadBlobAsync(productPath, buildStream).ConfigureAwait(false);
 
             log.LogInformation($"Creating a new build for {product}");
 

@@ -42,7 +42,7 @@ namespace Outboard.Api
         /// <param name="identity">An identity.</param>
         /// <param name="log">An object for recording logs.</param>
         /// <returns>A JSON payload containing metadata about releases.</returns>
-        [FunctionName("meta")]
+        [FunctionName("read-meta")]
         public async Task<HttpResponseMessage> Run(
             [HttpTrigger(AuthorizationLevel.User, "get", Route = "meta")] HttpRequest request, ClaimsPrincipal identity, ILogger log)
         {

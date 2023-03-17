@@ -26,7 +26,7 @@ namespace Outboard.Api
         /// <param name="environment">The ID of the environment to which this build is deployed.</param>
         /// <param name="log">An object for recording logs.</param>
         /// <returns>204 if successfully created.</returns>
-        [FunctionName("deploy")]
+        [FunctionName("create-deploy")]
         public static async Task<HttpResponseMessage> Run(
             [HttpTrigger(AuthorizationLevel.Admin, "post", Route = "deploy/{build:alpha}/{pathway:alpha}/{environment:alpha}")] HttpRequest request, string build, string pathway, string environment, ILogger log)
         {
