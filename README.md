@@ -10,20 +10,54 @@ A build represents a new version of a product. Internally the ID of a build will
 classDiagram
       Build "1" --> "*" Note : Changes
       class Build{
-          +string Id
           +string Version
           +DateTimeOffset BuildDateUtc
           +Note[] Changes
       }
       class Note{
           +string Id
+          +string Type
           +string Title
           +string Description
           +string SupportingHtml
           +bool IsHighlighted
-          +string Type
       }
 ```
+
+## API
+
+### Send build information
+To automatically update your boards, connect Outboard to your CI/CD process. Your CD pipeline should make an HTTP request to your Outboard instance API using cURL or similar, in the format below. The submitted payload can come from anywhere, but it's intended to be mapped from your commit history or the work items linked to your PR.
+
+``` http
+POST /api/build/{productId}?code={API_KEY} HTTP/1.1
+Host: {yourdomain}
+Content-Type: application/json
+
+{
+    "version": "1.9.10",
+    "buildDateUtc": "2023-02-12T16:08Z",
+    "changes": [
+        {
+            "id": "4839",
+            "type": "Feature",
+            "title": "Enhanced editing",
+            "description": "Added the ability to save widgets after editing",
+            "supportingHtml": "Please go <a href=\"https://youtu.be/dQw4w9WgXcQ\">here</a> to learn more.",
+            "isHighlighted": true
+        },
+        {
+            "id": "1780",
+            "type": "Bugfix",
+            "title": "Delete confirm",
+            "description": "The confirmation dialog for delete now behaves as expected.",
+            "isHighlighted": false
+        }
+    ]
+}
+```
+
+### Send deployment information
 
 ## Available Scripts
 

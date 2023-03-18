@@ -9,11 +9,6 @@ namespace Outboard.Api.Resources
     public class BuildResource
     {
         /// <summary>
-        /// A unique identifier for the build, typically the concatenated version and product ID.
-        /// </summary>
-        public string Id { get; set; }
-
-        /// <summary>
         /// The version of the build. This should be unique for any given product.
         /// </summary>
         public string Version { get; set; }
