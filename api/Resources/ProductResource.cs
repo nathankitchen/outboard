@@ -16,7 +16,7 @@ namespace Outboard.Api.Resources
         public string Id
         {
             get => _id;
-            set => _id = ToSlug(value);
+            set => _id = value?.ToSlug();
         }
 
         /// <summary>

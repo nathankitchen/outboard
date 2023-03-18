@@ -66,6 +66,16 @@ namespace Outboard.Api
         }
 
         /// <summary>
+        /// Creates a new response representing a resource which could not be found.
+        /// </summary>
+        /// <param name="message">A descriptive message explaining which resource could not be found.</param>
+        /// <returns>An HTTP response representing a Not Found response.</returns>
+        protected static HttpResponseMessage NotFound(string message)
+        {
+            return GetResponse(HttpStatusCode.NotFound, new { Message = message });
+        }
+
+        /// <summary>
         /// Gets an HTTP JSON response. 
         /// </summary>
         /// <param name="code">The HTTP status code.</param>

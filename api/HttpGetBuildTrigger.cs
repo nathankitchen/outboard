@@ -2,19 +2,15 @@ namespace Outboard.Api
 {
     using System;
     using System.Linq;
-    using System.Net;
     using System.Net.Http;
     using System.Security.Claims;
-    using System.Text;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Http;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Serialization;
-    using Outboard.Api.Blobs;
+    using Outboard.Api.Data;
     using Outboard.Api.Resources;
 
     /// <summary>
@@ -24,33 +20,30 @@ namespace Outboard.Api
     /// <example>
     /// <c>GET /builds/{product}/{buildId}</c>
     /// </example>
-    public class HttpGetBuildTrigger
+    public class HttpGetBuildTrigger : HttpTrigger
     {
         /// <summary>
-        /// Creates a new instance of a function to g
+        /// Creates a new instance of a function to return details of a build.
         /// </summary>
-        public HttpGetBuildTrigger(IConfiguration config, IBlobStore blobStore)
+        public HttpGetBuildTrigger(IConfiguration config, IDataStore dataStore) : base(config, dataStore)
         {
-            this.BlobStore = blobStore;
-            this.Configuration = config;
         }
 
-        private IBlobStore BlobStore { get; init; }
-        private IConfiguration Configuration { get; init; }
-
         /// <summary>
-        /// Handles requests to create a new deployment of a given build into an environment.
+        /// Returns a list of builds for a given product, starting with the most recent.
         /// </summary>
         /// <param name="request">Incoming HTTP request details.</param>
-        /// <param name="identity">An identity.</param>
+        /// <param name="principal">An identity.</param>
+        /// <param name="productId">The ID of the product to get the build for.</param>
+        /// <param name="buildId">The build ID of the product to get.</param>
         /// <param name="log">An object for recording logs.</param>
         /// <returns>A JSON payload containing metadata about releases.</returns>
         [FunctionName("read-build")]
         public async Task<HttpResponseMessage> Run(
-            [HttpTrigger(AuthorizationLevel.User, "get", Route = "builds")] HttpRequest request, ClaimsPrincipal identity, ILogger log)
+            [HttpTrigger(AuthorizationLevel.User, "get", Route = "builds/{productId}/{buildId}")] HttpRequest request, ClaimsPrincipal principal, string productId, string buildId, ILogger log)
         {
             ArgumentNullException.ThrowIfNull(request);
-            ArgumentNullException.ThrowIfNull(identity);
+            ArgumentNullException.ThrowIfNull(principal);
             ArgumentNullException.ThrowIfNull(log);
 
             await Task.CompletedTask.ConfigureAwait(true);
@@ -58,78 +51,21 @@ namespace Outboard.Api
             var config = new ConfigResource();
             this.Configuration.GetSection("outboard").Bind(config);
 
-            log.LogInformation($"Getting metadata for {identity?.Identity?.Name} and {config.Environments.Count}");
-
-            if (this.BlobStore == null)
-            { 
-                log.LogInformation($"No blob");
+            var product = config.Products.FirstOrDefault(p => p.Id == productId);
+            
+            if (product == null)
+            {
+                return NotFound($"Requested product \"{productId}\" could not be found.");
             }
 
-            var trimmedConfig = new ConfigResource();
-
-            foreach (var environment in config.Environments.Where(e => e.Roles.Contains("anonymous")))
+            if (!product.Roles.Any(r => principal.IsInRole(r)))
             {
-                trimmedConfig.Environments.Add(environment);
+                return NotFound($"Requested product \"{productId}\" could not be found.");
             }
 
-            foreach (var product in config.Products.Where(p => p.Roles.Contains("anonymous")))
-            {
-                trimmedConfig.Products.Add(product);
-            }
+            //var build = this.DataStore.GetBuild(productId);
 
-            foreach (var pathways in config.Pathways.Where(p => p.Roles.Contains("anonymous")))
-            {
-                trimmedConfig.Pathways.Add(pathways);
-            }
-    
-            return Success(trimmedConfig);
-        }
-
-        /// <summary>
-        /// Creates a new successful response, returning the requested data.
-        /// </summary>
-        /// <param name="data">An object represnting a valid data response.</param>
-        /// <returns>An HTTP response representing a successful response.</returns>
-        public static HttpResponseMessage Success(object data)
-        {
-            return GetResponse(HttpStatusCode.OK, data);
-        }
-
-        /// <summary>
-        /// Creates a new Bad Request response, representing an invalid request.
-        /// </summary>
-        /// <param name="parameter">The name of the invalid parameter.</param>
-        /// <param name="message">A descriptive message explaining why the parameter is invalid.</param>
-        /// <returns>An HTTP response representing a Bad Request response.</returns>
-        public static HttpResponseMessage BadRequest(string parameter, string message)
-        {
-            return GetResponse(HttpStatusCode.BadRequest, new { Message = message, Parameter = parameter });
-        }
-
-        /// <summary>
-        /// Gets an HTTP JSON response. 
-        /// </summary>
-        /// <param name="code">The HTTP status code.</param>
-        /// <param name="data">An object representing the data to return as JSON.</param>
-        /// <returns>An <c>HttpResponseMessage</c> retpresenting the required status and data.</returns>
-        public static HttpResponseMessage GetResponse(HttpStatusCode code, object data)
-        {
-            ArgumentNullException.ThrowIfNull(data);
-
-            var contractResolver = new DefaultContractResolver { NamingStrategy = new CamelCaseNamingStrategy() };
-
-            var settings = new JsonSerializerSettings
-            {
-                ContractResolver = contractResolver,
-                Formatting = Formatting.Indented
-            };
-
-            string payload = JsonConvert.SerializeObject(data, settings);
-
-            return new HttpResponseMessage(code)
-            {
-                Content = new StringContent(payload, Encoding.UTF8, System.Net.Mime.MediaTypeNames.Application.Json)
-            };
+            return Success("OK");
         }
     }
 }

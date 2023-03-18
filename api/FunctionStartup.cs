@@ -41,8 +41,8 @@ namespace FunctionApp
             builder.Services.AddSingleton<IDataStore>((a) => 
             {
                 var config = a.GetRequiredService<IConfiguration>();
-                string connection = config.GetConnectionString("outboard-connection-blob");
-                string container = config.GetConnectionString("outboard-connection-blob-container");
+                string connection = config.GetValue<string>("outboard-connection-blob");
+                string container = config.GetValue<string>("outboard-connection-blob-container");
                 return new BlobDataStore(connection, container); 
             });
         }

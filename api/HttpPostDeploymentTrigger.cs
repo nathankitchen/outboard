@@ -1,84 +1,51 @@
 namespace Outboard.Api
 {
     using System;
-    using System.Linq;
     using System.Net;
     using System.Net.Http;
-    using System.Security.Claims;
     using System.Text;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Http;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
-    using Outboard.Api.Blobs;
-    using Outboard.Api.Resources;
 
     /// <summary>
-    /// HTTP-based trigger used as an API for Outboard releases.
+    /// HTTP-based trigger used as an API for Outboard releases. This function handles
+    /// requests for creating a new deployment of a given product build.
     /// </summary>
-    public class HttpGetDeploymentsTrigger
+    /// <example>
+    /// <c>POST deployments/{buildId}/{pathwayId}/{environmentId}</c>
+    public class HttpPostDeploymentTrigger : HttpTrigger
     {
-        /// <summary>
-        /// Creates a new instance of a function to g
-        /// </summary>
-        public HttpGetDeploymentsTrigger(IConfiguration config, IBlobStore blobStore)
-        {
-            this.BlobStore = blobStore;
-            this.Configuration = config;
-        }
-
-        private IBlobStore BlobStore { get; init; }
-        private IConfiguration Configuration { get; init; }
-
         /// <summary>
         /// Handles requests to create a new deployment of a given build into an environment.
         /// </summary>
         /// <param name="request">Incoming HTTP request details.</param>
-        /// <param name="identity">An identity.</param>
+        /// <param name="build">The ID of the build which is being deployed.</param>
+        /// <param name="pathway">The ID of the pathway upon which this build is proceeding.</param>
+        /// <param name="environment">The ID of the environment to which this build is deployed.</param>
         /// <param name="log">An object for recording logs.</param>
-        /// <returns>A JSON payload containing metadata about releases.</returns>
-        [FunctionName("read-deployments")]
-        public async Task<HttpResponseMessage> Run(
-            [HttpTrigger(AuthorizationLevel.User, "get", Route = "builds")] HttpRequest request, ClaimsPrincipal identity, ILogger log)
+        /// <returns>204 if successfully created.</returns>
+        [FunctionName("create-deployment")]
+        public static async Task<HttpResponseMessage> Run(
+            [HttpTrigger(AuthorizationLevel.Admin, "post", Route = "deployments/{buildId}/{pathwayId}/{environmentId}")] HttpRequest request, string build, string pathway, string environment, ILogger log)
         {
             ArgumentNullException.ThrowIfNull(request);
-            ArgumentNullException.ThrowIfNull(identity);
+            ArgumentNullException.ThrowIfNull(build);
+            ArgumentNullException.ThrowIfNull(pathway);
+            ArgumentNullException.ThrowIfNull(environment);
             ArgumentNullException.ThrowIfNull(log);
+
+            var utc = DateTimeOffset.UtcNow;
+
+            log.LogInformation($"Creating a new deployment for {build} into {environment}");
 
             await Task.CompletedTask.ConfigureAwait(true);
 
-            var config = new ConfigResource();
-            this.Configuration.GetSection("outboard").Bind(config);
-
-            log.LogInformation($"Getting metadata for {identity?.Identity?.Name} and {config.Environments.Count}");
-
-            if (this.BlobStore == null)
-            { 
-                log.LogInformation($"No blob");
-            }
-
-            var trimmedConfig = new ConfigResource();
-
-            foreach (var environment in config.Environments.Where(e => e.Roles.Contains("anonymous")))
-            {
-                trimmedConfig.Environments.Add(environment);
-            }
-
-            foreach (var product in config.Products.Where(p => p.Roles.Contains("anonymous")))
-            {
-                trimmedConfig.Products.Add(product);
-            }
-
-            foreach (var pathways in config.Pathways.Where(p => p.Roles.Contains("anonymous")))
-            {
-                trimmedConfig.Pathways.Add(pathways);
-            }
-    
-            return Success(trimmedConfig);
+            return Success("Ok");
         }
 
         /// <summary>

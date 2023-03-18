@@ -47,7 +47,7 @@ namespace Outboard.Api.Resources
         public string Type
         {
             get => _type;
-            set => _type = ToSlug(value);
+            set => _type = value?.ToSlug();
         }
     }
 }

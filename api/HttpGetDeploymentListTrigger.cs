@@ -4,6 +4,7 @@ namespace Outboard.Api
     using System.Linq;
     using System.Net.Http;
     using System.Security.Claims;
+    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -13,19 +14,15 @@ namespace Outboard.Api
     using Outboard.Api.Resources;
 
     /// <summary>
-    /// HTTP-based trigger used as an API for Outboard releases. This function handles
-    /// requests for metadata about the current Outboard configuration, namely the environments,
-    /// products, and pathways that the current user has access to.
+    /// HTTP-based trigger used as an API for Outboard releases.
     /// </summary>
-    /// <example>
-    /// <c>POST /builds/{product}</c>
-    /// </example>
-    public class HttpGetMetaTrigger : HttpTrigger
+    public class HttpGetDeploymentListTrigger : HttpTrigger
     {
         /// <summary>
-        /// Creates a new instance of a function able to return metadata.
+        /// Creates a new instance of a function to get a list of deployments
+        /// to a specific environment.
         /// </summary>
-        public HttpGetMetaTrigger(IConfiguration config, IDataStore dataStore) : base(config, dataStore)
+        public HttpGetDeploymentListTrigger(IConfiguration config, IDataStore dataStore) : base(config, dataStore)
         {
         }
 
@@ -33,21 +30,25 @@ namespace Outboard.Api
         /// Handles requests to create a new deployment of a given build into an environment.
         /// </summary>
         /// <param name="request">Incoming HTTP request details.</param>
-        /// <param name="principal">A claims principal.</param>
+        /// <param name="principal">A principal with the identity of the user.</param>
+        /// <param name="environmentId">The ID of an environment.</param>
+        /// <param name="productId">The ID of the product to check deployments of.</param>
         /// <param name="log">An object for recording logs.</param>
         /// <returns>A JSON payload containing metadata about releases.</returns>
-        [FunctionName("read-meta")]
-        public HttpResponseMessage Run(
-            [HttpTrigger(AuthorizationLevel.User, "get", Route = "meta")] HttpRequest request, ClaimsPrincipal principal, ILogger log)
+        [FunctionName("list-deployments")]
+        public async Task<HttpResponseMessage> Run(
+            [HttpTrigger(AuthorizationLevel.User, "get", Route = "deployments/{environmentId}/{productId}")] HttpRequest request, ClaimsPrincipal principal, string environmentId, string productId, ILogger log)
         {
-            ArgumentNullException.ThrowIfNull(request);
-            ArgumentNullException.ThrowIfNull(principal);
-            ArgumentNullException.ThrowIfNull(log);
+            ArgumentNullException.ThrowIfNull(request, nameof(request));
+            ArgumentNullException.ThrowIfNull(principal, nameof(principal));
+            ArgumentNullException.ThrowIfNull(environmentId, nameof(environmentId));
+            ArgumentNullException.ThrowIfNull(productId, nameof(productId));
+            ArgumentNullException.ThrowIfNull(log, nameof(log));
+
+            await Task.CompletedTask.ConfigureAwait(true);
 
             var config = new ConfigResource();
             this.Configuration.GetSection("outboard").Bind(config);
-
-            log.LogInformation($"Getting metadata for {principal?.Identity?.Name} and {config.Environments.Count}");
 
             var trimmedConfig = new ConfigResource();
 
@@ -65,15 +66,8 @@ namespace Outboard.Api
             {
                 trimmedConfig.Pathways.Add(pathways);
             }
-
-            var metaResource = new
-            {
-                Identity = principal?.Identity?.Name ?? "anonymous",
-                Roles = Array.Empty<string>(),
-                Config = trimmedConfig
-            };
-
-            return Success(metaResource);
+    
+            return Success(trimmedConfig);
         }
     }
 }
