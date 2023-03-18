@@ -1,67 +1,84 @@
 namespace Outboard.Api
 {
     using System;
-    using System.IO;
+    using System.Linq;
     using System.Net;
     using System.Net.Http;
+    using System.Security.Claims;
     using System.Text;
     using System.Threading.Tasks;
-    using Azure.Core;
-    using Azure.Identity;
-    using Azure.Storage.Blobs;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Http;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
+    using Outboard.Api.Blobs;
     using Outboard.Api.Resources;
 
     /// <summary>
     /// HTTP-based trigger used as an API for Outboard releases.
     /// </summary>
-    public static class PostBuildFunction
+    public class HttpGetDeploymentsTrigger
     {
         /// <summary>
-        /// Handles requests to create a new build for a given product.
+        /// Creates a new instance of a function to g
+        /// </summary>
+        public HttpGetDeploymentsTrigger(IConfiguration config, IBlobStore blobStore)
+        {
+            this.BlobStore = blobStore;
+            this.Configuration = config;
+        }
+
+        private IBlobStore BlobStore { get; init; }
+        private IConfiguration Configuration { get; init; }
+
+        /// <summary>
+        /// Handles requests to create a new deployment of a given build into an environment.
         /// </summary>
         /// <param name="request">Incoming HTTP request details.</param>
-        /// <param name="product">The ID of the product to which this build relates.</param>
+        /// <param name="identity">An identity.</param>
         /// <param name="log">An object for recording logs.</param>
-        /// <returns>204 if successfully created.</returns>
-        [FunctionName("create-build")]
-        public static async Task<HttpResponseMessage> Run(
-            [HttpTrigger(AuthorizationLevel.Admin, "post", Route = "build/{product:alpha}")] HttpRequest request, string product, ILogger log)
+        /// <returns>A JSON payload containing metadata about releases.</returns>
+        [FunctionName("read-deployments")]
+        public async Task<HttpResponseMessage> Run(
+            [HttpTrigger(AuthorizationLevel.User, "get", Route = "builds")] HttpRequest request, ClaimsPrincipal identity, ILogger log)
         {
             ArgumentNullException.ThrowIfNull(request);
-            ArgumentNullException.ThrowIfNull(product);
+            ArgumentNullException.ThrowIfNull(identity);
             ArgumentNullException.ThrowIfNull(log);
 
-            using var stream = new StreamReader(request.Body);
-            string payload = await stream.ReadToEndAsync().ConfigureAwait(false);
+            await Task.CompletedTask.ConfigureAwait(true);
 
-            var build = JsonConvert.DeserializeObject<BuildResource>(payload);
+            var config = new ConfigResource();
+            this.Configuration.GetSection("outboard").Bind(config);
 
-            var buildData = JsonConvert.SerializeObject(build);
-            using var buildStream = new MemoryStream(Encoding.Unicode.GetBytes(buildData));
+            log.LogInformation($"Getting metadata for {identity?.Identity?.Name} and {config.Environments.Count}");
 
-            TokenCredential credential = new DefaultAzureCredential();
+            if (this.BlobStore == null)
+            { 
+                log.LogInformation($"No blob");
+            }
 
-            string accountName = "account";
-            string blobUri = "https://" + accountName + ".blob.core.windows.net";
+            var trimmedConfig = new ConfigResource();
 
-            var blobServiceClient = new BlobServiceClient(new Uri(blobUri), credential);
+            foreach (var environment in config.Environments.Where(e => e.Roles.Contains("anonymous")))
+            {
+                trimmedConfig.Environments.Add(environment);
+            }
 
-            var containerClient = blobServiceClient.GetBlobContainerClient("blobs");
+            foreach (var product in config.Products.Where(p => p.Roles.Contains("anonymous")))
+            {
+                trimmedConfig.Products.Add(product);
+            }
 
-            var productSlug = product.ToSlug();
-            var buildSlug = build.Id.ToSlug();
-            var productPath = $"/{productSlug}/{buildSlug}.json";
-            await containerClient.UploadBlobAsync(productPath, buildStream).ConfigureAwait(false);
-
-            log.LogInformation($"Creating a new build for {product}");
-
-            return Success("Ok");
+            foreach (var pathways in config.Pathways.Where(p => p.Roles.Contains("anonymous")))
+            {
+                trimmedConfig.Pathways.Add(pathways);
+            }
+    
+            return Success(trimmedConfig);
         }
 
         /// <summary>

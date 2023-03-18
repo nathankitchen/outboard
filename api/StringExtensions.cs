@@ -36,6 +36,13 @@ namespace Outboard.Api {
                 }
             }
 
+            // If the last thing we added was a dash, strip it. Slugs shouldn't
+            // end in a dash.
+            if (lastCharWasWhitespace)
+            {
+                bob.Remove(bob.Length - 1, 1);
+            }
+
             return bob.ToString();
         }
     }
