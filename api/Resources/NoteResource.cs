@@ -35,7 +35,7 @@ namespace Outboard.Api.Resources
         /// Indicates whether to highlight this change note.
         /// </summary>
         /// <value>When <c>true</c> the note should be highlighted; otherwise, <c>false</c></value>
-        public bool Highlight { get; set; }
+        public bool IsHighlighted { get; set; }
 
         /// <summary>
         /// A single word categorising the change as a type. Dashes are allowed.

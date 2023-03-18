@@ -3,30 +3,27 @@ A website for displaying release details across a series of environments.
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## "Build" data model
+A build represents a new version of a product. Internally the ID of a build will always be the version converted to the form of a slug, while the original version format is maintained in the `Version` property. A series of notes capture the changes that go into the build.
+
 ```mermaid
 classDiagram
-      Animal <|-- Duck
-      Animal <|-- Fish
-      Animal <|-- Zebra
-      Animal : +int age
-      Animal : +String gender
-      Animal: +isMammal()
-      Animal: +mate()
-      class Duck{
-          +String beakColor
-          +swim()
-          +quack()
+      Build "1" --> "*" Note : Changes
+      class Build{
+          +string Id
+          +string Version
+          +DateTimeOffset BuildDateUtc
+          +Note[] Changes
       }
-      class Fish{
-          -int sizeInFeet
-          -canEat()
-      }
-      class Zebra{
-          +bool is_wild
-          +run()
+      class Note{
+          +string Id
+          +string Title
+          +string Description
+          +string SupportingHtml
+          +bool IsHighlighted
+          +string Type
       }
 ```
-
 
 ## Available Scripts
 

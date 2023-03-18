@@ -21,7 +21,7 @@ namespace Outboard.Api.Resources
         /// <summary>
         /// The date and time when the build was completed.
         /// </summary>
-        public DateTimeOffset BuildDate { get; set; }
+        public DateTimeOffset BuildDateUtc { get; set; }
 
         /// <summary>
         /// A set of release notes associated with this build.
