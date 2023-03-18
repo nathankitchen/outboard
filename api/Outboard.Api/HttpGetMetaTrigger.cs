@@ -15,10 +15,10 @@ namespace Outboard.Api
     /// <summary>
     /// HTTP-based trigger used as an API for Outboard releases. This function handles
     /// requests for metadata about the current Outboard configuration, namely the environments,
-    /// products, and pathways that the current user has access to.
+    /// and products that the current user has access to.
     /// </summary>
     /// <example>
-    /// <c>POST /builds/{product}</c>
+    /// <c>GET /meta</c>
     /// </example>
     public class HttpGetMetaTrigger : HttpTrigger
     {
@@ -59,11 +59,6 @@ namespace Outboard.Api
             foreach (var product in config.Products.Where(p => p.Roles.Contains("anonymous")))
             {
                 trimmedConfig.Products.Add(product);
-            }
-
-            foreach (var pathways in config.Pathways.Where(p => p.Roles.Contains("anonymous")))
-            {
-                trimmedConfig.Pathways.Add(pathways);
             }
 
             var metaResource = new

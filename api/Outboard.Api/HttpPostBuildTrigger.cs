@@ -51,7 +51,7 @@ namespace Outboard.Api
             
             await this.DataStore.SaveBuild(productId, build).ConfigureAwait(false);
 
-            return Success(build);
+            return Created(build);
         }
     }
 }

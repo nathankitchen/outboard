@@ -58,12 +58,13 @@ namespace Outboard.Api.Data.Blob
         /// <param name="build">The build resource data.</param>
         public async Task SaveBuild(string productId, BuildResource build)
         {
+            ArgumentNullException.ThrowIfNull(productId, nameof(productId));
             ArgumentNullException.ThrowIfNull(build, nameof(build));
 
             var buildData = JsonConvert.SerializeObject(build, GetSerializerSettings());
 
-            using var buildDataStream = new MemoryStream(Encoding.Unicode.GetBytes(buildData));
-            using var buildIdStream = new MemoryStream(Encoding.Unicode.GetBytes(build.Id));
+            using var buildDataStream = new MemoryStream(Encoding.UTF8.GetBytes(buildData));
+            using var buildIdStream = new MemoryStream(Encoding.UTF8.GetBytes(build.Version));
 
             var buildDatePath = build.GetDateEntryPath(productId);
             var buildDataPath = build.GetDataPath(productId);
@@ -72,6 +73,33 @@ namespace Outboard.Api.Data.Blob
             var uploadMeta = this.BlobContainer.UploadBlobAsync(buildDatePath, buildIdStream);
 
             await Task.WhenAll(uploadMeta, uploadProduct).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Save a release record. Archives all relevant information as a snapshot
+        /// to give a stable history.
+        /// </summary>
+        /// <param name="release">The release data to save.</param>
+        public async Task SaveRelease(ReleaseResource release)
+        { 
+            ArgumentNullException.ThrowIfNull(release, nameof(release));
+
+            var releaseData = JsonConvert.SerializeObject(release, GetSerializerSettings());
+
+            var data = Encoding.UTF8.GetBytes(releaseData);
+            using var buildHistoryDataStream = new MemoryStream(data);
+            using var releaseLatestDataStream = new MemoryStream(data);
+            using var releaseHistoryDataStream = new MemoryStream(data);
+
+            var buildHistoryPath = release.GetBuildReleaseHistoryPath();
+            var releaseLatestPath = release.GetReleaseLatestPath();
+            var releaseHistoryPath = release.GetReleaseHistoryPath();
+
+            var uploadBuildHistory = this.BlobContainer.UploadBlobAsync(buildHistoryPath, buildHistoryDataStream);
+            var uploadReleaseLatest = this.BlobContainer.UploadBlobAsync(releaseLatestPath, releaseLatestDataStream);
+            var uploadReleaseHistory = this.BlobContainer.UploadBlobAsync(releaseHistoryPath, releaseHistoryDataStream);
+
+            await Task.WhenAll(uploadBuildHistory, uploadReleaseLatest, uploadReleaseHistory).ConfigureAwait(false);
         }
 
         private static JsonSerializerSettings GetSerializerSettings()

@@ -45,6 +45,16 @@ namespace Outboard.Api
         }
 
         /// <summary>
+        /// Creates a new successful response, indicating the resource was created successfully.
+        /// </summary>
+        /// <param name="data">An object represnting a valid data response.</param>
+        /// <returns>An HTTP response representing successful resource creation.</returns>
+        protected static HttpResponseMessage Created(object data)
+        {
+            return GetResponse(HttpStatusCode.Created, data);
+        }
+
+        /// <summary>
         /// Creates a new Bad Request response, representing an invalid request.
         /// </summary>
         /// <param name="parameter">The name of the invalid parameter.</param>

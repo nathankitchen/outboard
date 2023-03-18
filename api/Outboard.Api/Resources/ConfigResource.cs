@@ -16,10 +16,5 @@ namespace Outboard.Api.Resources
         /// A list of all the environments that can be managed by Outboard.
         /// </summary>
         public IList<EnvironmentResource> Environments { get; } = new List<EnvironmentResource>();
-
-        /// <summary>
-        /// A list of all the deployment pathways that can be managed by Outboard.
-        /// </summary>
-        public IList<PathwayResource> Pathways { get; } = new List<PathwayResource>();
     }
 }

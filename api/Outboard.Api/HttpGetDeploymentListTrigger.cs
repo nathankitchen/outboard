@@ -2,34 +2,27 @@ namespace Outboard.Api
 {
     using System;
     using System.Linq;
-    using System.Net;
     using System.Net.Http;
     using System.Security.Claims;
-    using System.Text;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Http;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Serialization;
     using Outboard.Api.Data;
     using Outboard.Api.Resources;
 
     /// <summary>
-    /// HTTP-based trigger used as an API for Outboard releases. This function handles
-    /// requests for details about a a specific environment deployment.
+    /// HTTP-based trigger used as an API for Outboard releases.
     /// </summary>
-    /// <example>
-    /// <c>GET /deployments/{environmentId}/{productId}/{buildId}</c>
-    /// </example>
-    public class HttpGetDeploymentTrigger : HttpTrigger
+    public class HttpGetDeploymentListTrigger : HttpTrigger
     {
         /// <summary>
-        /// Creates a new instance of a function to g
+        /// Creates a new instance of a function to get a list of deployments
+        /// to a specific environment.
         /// </summary>
-        public HttpGetDeploymentTrigger(IConfiguration config, IDataStore dataStore) : base(config, dataStore)
+        public HttpGetDeploymentListTrigger(IConfiguration config, IDataStore dataStore) : base(config, dataStore)
         {
         }
 
@@ -37,23 +30,25 @@ namespace Outboard.Api
         /// Handles requests to create a new deployment of a given build into an environment.
         /// </summary>
         /// <param name="request">Incoming HTTP request details.</param>
-        /// <param name="identity">An identity.</param>
+        /// <param name="principal">A principal with the identity of the user.</param>
+        /// <param name="environmentId">The ID of an environment.</param>
+        /// <param name="productId">The ID of the product to check deployments of.</param>
         /// <param name="log">An object for recording logs.</param>
         /// <returns>A JSON payload containing metadata about releases.</returns>
-        [FunctionName("read-deployment")]
+        [FunctionName("list-deployments")]
         public async Task<HttpResponseMessage> Run(
-            [HttpTrigger(AuthorizationLevel.User, "get", Route = "deployments/{environmentId}/{productId}/{buildId}")] HttpRequest request, ClaimsPrincipal identity, ILogger log)
+            [HttpTrigger(AuthorizationLevel.User, "get", Route = "deployments/{environmentId}/{productId}")] HttpRequest request, ClaimsPrincipal principal, string environmentId, string productId, ILogger log)
         {
-            ArgumentNullException.ThrowIfNull(request);
-            ArgumentNullException.ThrowIfNull(identity);
-            ArgumentNullException.ThrowIfNull(log);
+            ArgumentNullException.ThrowIfNull(request, nameof(request));
+            ArgumentNullException.ThrowIfNull(principal, nameof(principal));
+            ArgumentNullException.ThrowIfNull(environmentId, nameof(environmentId));
+            ArgumentNullException.ThrowIfNull(productId, nameof(productId));
+            ArgumentNullException.ThrowIfNull(log, nameof(log));
 
             await Task.CompletedTask.ConfigureAwait(true);
 
             var config = new ConfigResource();
             this.Configuration.GetSection("outboard").Bind(config);
-
-            log.LogInformation($"Getting metadata for {identity?.Identity?.Name} and {config.Environments.Count}");
 
             var trimmedConfig = new ConfigResource();
 
@@ -67,11 +62,6 @@ namespace Outboard.Api
                 trimmedConfig.Products.Add(product);
             }
 
-            foreach (var pathways in config.Pathways.Where(p => p.Roles.Contains("anonymous")))
-            {
-                trimmedConfig.Pathways.Add(pathways);
-            }
-    
             return Success(trimmedConfig);
         }
     }

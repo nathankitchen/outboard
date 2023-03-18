@@ -3,7 +3,7 @@
   "configurations": {
     "app": {
       "appLocation": "app",
-      "apiLocation": "api",
+      "apiLocation": "api/Outboard.Api",
       "outputLocation": "build",
       "appBuildCommand": "npm run build",
       "apiBuildCommand": "dotnet publish -c Release",

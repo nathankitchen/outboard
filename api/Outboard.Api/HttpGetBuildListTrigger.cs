@@ -62,11 +62,6 @@ namespace Outboard.Api
             {
                 trimmedConfig.Products.Add(product);
             }
-
-            foreach (var pathways in config.Pathways.Where(p => p.Roles.Contains("anonymous")))
-            {
-                trimmedConfig.Pathways.Add(pathways);
-            }
     
             return Success(trimmedConfig);
         }
