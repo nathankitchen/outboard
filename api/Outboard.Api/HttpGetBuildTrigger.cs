@@ -46,8 +46,6 @@ namespace Outboard.Api
             ArgumentNullException.ThrowIfNull(principal);
             ArgumentNullException.ThrowIfNull(log);
 
-            await Task.CompletedTask.ConfigureAwait(true);
-
             var config = new ConfigResource();
             this.Configuration.GetSection("outboard").Bind(config);
 
@@ -58,14 +56,14 @@ namespace Outboard.Api
                 return NotFound($"Requested product \"{productId}\" could not be found.");
             }
 
-            if (!product.Roles.Any(r => principal.IsInRole(r)))
-            {
-                return NotFound($"Requested product \"{productId}\" could not be found.");
-            }
+            //if (!product.Roles.Any(r => principal.IsInRole(r)))
+            //{
+            //    return NotFound($"Requested product \"{productId}\" could not be found.");
+            //}
 
-            //var build = this.DataStore.GetBuild(productId);
+            var build = await this.DataStore.LoadBuild(productId, buildId).ConfigureAwait(false);
 
-            return Success("OK");
+            return Success(build);
         }
     }
 }

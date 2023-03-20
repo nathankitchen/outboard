@@ -9,6 +9,14 @@ namespace Outboard.Api.Data
     /// </summary>
     public interface IDataStore
     {
+
+        /// <summary>
+        /// Gets a build record for the specified product.
+        /// </summary>
+        /// <param name="productId">The product ID that the build is part of.</param>
+        /// <param name="buildVersion">The build to retrieve data for.</param>
+        Task<BuildResource> LoadBuild(string productId, string buildVersion);
+
         /// <summary>
         /// Save a build record for the specified product.
         /// </summary>

@@ -51,6 +51,26 @@ namespace Outboard.Api.Data.Blob
         protected BlobContainerClient BlobContainer { get; init; }
 
         /// <summary>
+        /// Gets a build record for the specified product.
+        /// </summary>
+        /// <param name="productId">The product ID that the build is part of.</param>
+        /// <param name="buildVersion">The build to retrieve data for.</param>
+        public async Task<BuildResource> LoadBuild(string productId, string buildVersion)
+        { 
+            ArgumentNullException.ThrowIfNull(productId, nameof(productId));
+            ArgumentNullException.ThrowIfNull(buildVersion, nameof(buildVersion));
+
+            var buildDataPath = ResourceExtensions.GetDataPath(productId, buildVersion);
+            var blobClient = this.BlobContainer.GetBlobClient(buildDataPath);
+
+            using var stream = await blobClient.OpenReadAsync().ConfigureAwait(false);
+            using var reader = new StreamReader(stream);
+            var payload = await reader.ReadToEndAsync().ConfigureAwait(false);
+
+            return JsonConvert.DeserializeObject<BuildResource>(payload);
+        }
+
+        /// <summary>
         /// Saves the specified build to blob storage. We save this record twice: once in
         /// chronological order and second by ID.
         /// </summary>
@@ -67,7 +87,7 @@ namespace Outboard.Api.Data.Blob
             using var buildIdStream = new MemoryStream(Encoding.UTF8.GetBytes(build.Version));
 
             var buildDatePath = build.GetDateEntryPath(productId);
-            var buildDataPath = build.GetDataPath(productId);
+            var buildDataPath = ResourceExtensions.GetDataPath(productId, build.Version);
 
             var uploadProduct = this.BlobContainer.UploadBlobAsync(buildDataPath, buildDataStream);
             var uploadMeta = this.BlobContainer.UploadBlobAsync(buildDatePath, buildIdStream);

@@ -23,16 +23,17 @@ namespace Outboard.Api.Data.Blob {
         /// <summary>
         /// Gets the path that should be used to store the data about the build.
         /// </summary>
-        /// <param name="build">The build to get a data storage path from.</param>
         /// <param name="product">The product that the build is for.</param>
+        /// <param name="build">The build to get a data storage path from.</param>
+
         /// <returns>A path to store the build data.</returns>
-        public static string GetDataPath(this BuildResource build, string product)
+        public static string GetDataPath(string product, string build)
         {
             ArgumentNullException.ThrowIfNull(build, nameof(build));
             ArgumentNullException.ThrowIfNull(product, nameof(product));
 
             var productSlug = product.ToSlug();
-            var buildSlug = build.Version.ToSlug();
+            var buildSlug = build.ToSlug();
 
             return $"/{productSlug}/{BuildByIdFolder}/{buildSlug}/_build.json";
         }

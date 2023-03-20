@@ -2,18 +2,14 @@ namespace Outboard.Api
 {
     using System;
     using System.Linq;
-    using System.Net;
     using System.Net.Http;
     using System.Security.Claims;
-    using System.Text;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Http;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Serialization;
     using Outboard.Api.Data;
     using Outboard.Api.Resources;
 
