@@ -1,6 +1,8 @@
 namespace Outboard.Api
 {
     using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
     using System.Net;
     using System.Net.Http;
     using System.Text;
@@ -62,7 +64,19 @@ namespace Outboard.Api
         /// <returns>An HTTP response representing a Bad Request response.</returns>
         protected static HttpResponseMessage BadRequest(string parameter, string message)
         {
-            return GetResponse(HttpStatusCode.BadRequest, new { Message = message, Parameter = parameter });
+            var result = new ValidationResult(message, new string[] { parameter });
+
+            return BadRequest(new List<ValidationResult>() { result });
+        }
+
+        /// <summary>
+        /// Creates a new Bad Request response, representing an invalid request.
+        /// </summary>
+        /// <param name="results">A message explaining why an object is invalid.</param>
+        /// <returns>An HTTP response representing a Bad Request response.</returns>
+        protected static HttpResponseMessage BadRequest(IEnumerable<ValidationResult> results)
+        {
+            return GetResponse(HttpStatusCode.BadRequest, results);
         }
 
         /// <summary>

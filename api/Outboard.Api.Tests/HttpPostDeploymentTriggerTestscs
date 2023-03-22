@@ -1,0 +1,61 @@
+namespace Outboard.Api.Tests
+{
+    using System;
+    using System.IO;
+    using System.Net;
+    using System.Text;
+    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Logging;
+    using Moq;
+    using Newtonsoft.Json;
+    using Outboard.Api.Data;
+    using Outboard.Api.Resources;
+    using Xunit;
+
+    /// <summary>
+    /// Unit tests for <see cref="HttpPostDeploymentTrigger" />.
+    /// </summary>
+    public class HttpPostDeploymentTriggerTests
+    {
+        [Fact]
+        public async Task Run_Success()
+        {
+            var approvalDate = DateTimeOffset.UtcNow.Subtract(new TimeSpan(1, 3, 4));
+            var deployDate = DateTimeOffset.UtcNow.Subtract(new TimeSpan(1, 0, 11));
+            var context = new DefaultHttpContext();
+
+            var deployment = new DeploymentResource()
+            {
+                Approval = { 
+                    ApprovalDate = approvalDate,
+                    Automated = true,
+                    Note = "Permission granted by Bob"
+                },
+                DeployDate = deployDate
+            };
+
+            string payload = JsonConvert.SerializeObject(deployment);
+
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(payload));
+
+            context.Request.ContentType = "application/json";
+            context.Request.Body = stream;
+
+            var log = new Mock<ILogger>();
+            var config = new Mock<IConfiguration>();
+            var data = new Mock<IDataStore>();
+
+            data.Setup(d => d.SaveRelease(It.IsAny<ReleaseResource>())).Returns(Task.CompletedTask);
+
+            var function = new HttpPostDeploymentTrigger(config.Object, data.Object);
+            var response = await function.Run(context.Request, "test", "v0.12", "dev", log.Object);
+
+            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+            
+            data.Verify(d => d.SaveRelease(
+                It.Is<ReleaseResource>(r => r.Builds[0].Version == "v0.12")));
+        }
+    }
+}

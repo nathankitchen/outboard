@@ -5,7 +5,7 @@ namespace Outboard.Api.Resources
     /// <summary>
     /// An object representing an approval, typically to deploy to a specific environment.
     /// </summary>
-    public class ApprovalResource : Resource
+    public class ApprovalResource
     {
         /// <summary>
         /// A short note to accompany the approval (plaintext).

@@ -6,7 +6,7 @@ namespace Outboard.Api.Resources
     /// <summary>
     /// An object representing a single named change in a release note.
     /// </summary>
-    public class EnvironmentResource : Resource
+    public class EnvironmentResource
     {
         private string _id = string.Empty;
 

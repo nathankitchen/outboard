@@ -1,6 +1,8 @@
 namespace Outboard.Api
 {
     using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
     using System.IO;
     using System.Net.Http;
     using System.Threading.Tasks;
@@ -48,7 +50,15 @@ namespace Outboard.Api
             string payload = await stream.ReadToEndAsync().ConfigureAwait(false);
 
             var build = JsonConvert.DeserializeObject<BuildResource>(payload);
-            
+
+            var context = new ValidationContext(build);
+            var errorResults = new List<ValidationResult>();
+
+            if (!Validator.TryValidateObject(build, context, errorResults, true))
+            {
+                return BadRequest(errorResults);
+            }
+
             await this.DataStore.SaveBuild(productId, build).ConfigureAwait(false);
 
             return Created(build);

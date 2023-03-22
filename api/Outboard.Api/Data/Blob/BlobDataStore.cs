@@ -1,12 +1,14 @@
 namespace Outboard.Api.Data.Blob
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Text;
     using System.Threading.Tasks;
     using Azure.Core;
     using Azure.Identity;
     using Azure.Storage.Blobs;
+    using Azure.Storage.Blobs.Models;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
     using Outboard.Api.Resources;
@@ -89,9 +91,25 @@ namespace Outboard.Api.Data.Blob
             var buildDatePath = build.GetDateEntryPath(productId);
             var buildDataPath = ResourceExtensions.GetDataPath(productId, build.Version);
 
-            var uploadProduct = this.BlobContainer.UploadBlobAsync(buildDataPath, buildDataStream);
-            var uploadMeta = this.BlobContainer.UploadBlobAsync(buildDatePath, buildIdStream);
+            var blobHeaders = new BlobHttpHeaders() { ContentType = "application/json" };
+            var metadata = new Dictionary<string, string>() {
+                { "BuildVersion", build.Version },
+                { "Product", productId }
+            };
 
+            var blobProductClient = this.BlobContainer.GetBlobClient(buildDataPath);
+            var blobMetaClient = this.BlobContainer.GetBlobClient(buildDatePath);
+
+            var uploadProduct = blobProductClient.UploadAsync(buildDataStream, metadata: metadata, httpHeaders: blobHeaders)
+                .ContinueWith( (t) => {
+                    blobProductClient.SetTagsAsync(metadata);
+                }, TaskScheduler.Default);
+            
+            var uploadMeta = blobMetaClient.UploadAsync(buildIdStream, metadata: metadata, httpHeaders: blobHeaders)
+                .ContinueWith( (t) => {
+                    blobProductClient.SetTagsAsync(metadata);
+                }, TaskScheduler.Default);
+                
             await Task.WhenAll(uploadMeta, uploadProduct).ConfigureAwait(false);
         }
 

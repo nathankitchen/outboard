@@ -33,9 +33,8 @@ namespace Outboard.Api.Data.Blob {
             ArgumentNullException.ThrowIfNull(product, nameof(product));
 
             var productSlug = product.ToSlug();
-            var buildSlug = build.ToSlug();
 
-            return $"/{productSlug}/{BuildByIdFolder}/{buildSlug}/_build.json";
+            return $"/{productSlug}/{BuildByIdFolder}/{build}/build.json";
         }
 
         /// <summary>
@@ -53,9 +52,8 @@ namespace Outboard.Api.Data.Blob {
             ArgumentNullException.ThrowIfNull(product, nameof(product));
 
             var productSlug = product.ToSlug();
-            var buildSlug = build.Version;
             var buildDate = build.BuildDateUtc.UtcDateTime.ToString("yyyyMMddhhmmss", CultureInfo.InvariantCulture);
-            return $"/{productSlug}/{BuildByDateFolder}/{buildDate}-{buildSlug}";
+            return $"/{productSlug}/{BuildByDateFolder}/{buildDate}-{build.Version}";
         }
 
         /// <summary>

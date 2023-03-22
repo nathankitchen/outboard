@@ -1,12 +1,11 @@
 namespace Outboard.Api.Resources    
 {
-    using System;
-    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
 
     /// <summary>
     /// An object representing a single named change in a release note.
     /// </summary>
-    public class NoteResource : Resource
+    public class NoteResource
     {
         private string _type = string.Empty;
 

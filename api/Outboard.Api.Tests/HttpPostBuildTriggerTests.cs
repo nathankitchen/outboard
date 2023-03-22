@@ -51,9 +51,8 @@ namespace Outboard.Api.Tests
 
             string payload = JsonConvert.SerializeObject(build);
 
-            var stream = new MemoryStream(Encoding.UTF8.GetBytes(payload));
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(payload));
 
-            Console.Write(payload);
             context.Request.ContentType = "application/json";
             context.Request.Body = stream;
 

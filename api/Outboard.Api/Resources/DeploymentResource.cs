@@ -5,7 +5,7 @@ namespace Outboard.Api.Resources
     /// <summary>
     /// An object representing a single named change in a release note.
     /// </summary>
-    public class DeploymentResource : Resource
+    public class DeploymentResource
     {
         /// <summary>
         /// The date that the build was deployed.

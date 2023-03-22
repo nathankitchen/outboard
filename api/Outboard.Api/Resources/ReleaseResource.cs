@@ -7,7 +7,7 @@ namespace Outboard.Api.Resources
     /// to preserve an accurate indication of the whole configuration at the point
     /// of release, making it a stable archive/audit record.
     /// </summary>
-    public class ReleaseResource : Resource
+    public class ReleaseResource
     {
         /// <summary>
         /// Gets or sets the ID of the environment that is being released to.
